@@ -1,0 +1,9 @@
+# astrid-tls is a wasm-only crate (its TLS code is cfg(target_arch = "wasm32")).
+# Default to the capsule target and route getrandom 0.4 (pulled by astrid-sdk) to
+# the astrid host backend, so the crate builds/tests standalone. Consumers set
+# their own equivalent config; this only applies to builds from this directory.
+[build]
+target = "wasm32-unknown-unknown"
+
+[target.wasm32-unknown-unknown]
+rustflags = ["--cfg=getrandom_backend=\"custom\""]

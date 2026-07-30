@@ -1,0 +1,38 @@
+[package]
+name = "astrid-tls"
+version = "0.1.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+description = "User-space TLS for Astrid capsules (wasm32): rustls with the pure-Rust RustCrypto provider and the astrid host clock, over the net host function"
+repository = "https://github.com/unicitynetwork/astrid-tls"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+astrid-sdk = { version = "0.7", optional = true }
+# rustls + pki-types are pinned so the vendored (patched) rustls-pki-types 1.15.0
+# applies via [patch.crates-io]. Newer rustls (0.23.43+) requires pki-types
+# >=1.15.1, which the one-line UnixTime patch doesn't cover, so the patch would be
+# silently skipped. Bump all three together (vendor + these pins) when upstreaming.
+rustls = { version = "=0.23.41", default-features = false, features = ["std", "tls12"], optional = true }
+rustls-pki-types = { version = "=1.15.0", optional = true }
+rustls-rustcrypto = { version = "0.0.2-alpha", optional = true }
+webpki-roots = { version = "0.26", optional = true }
+# tungstenite -> rand -> getrandom 0.2 needs the "custom" feature on wasm32 (no
+# platform backend). This crate provides the fill fn; registration MUST happen in
+# the capsule (wasm root) crate — see the getrandom02-shim feature docs / rng.rs.
+getrandom02 = { package = "getrandom", version = "0.2", features = ["custom"] }
+
+[features]
+default = []
+# TLS over astrid_sdk::net: rustls (RustCrypto provider) with the host clock.
+astrid = ["dep:astrid-sdk", "dep:rustls", "dep:rustls-pki-types", "dep:rustls-rustcrypto", "dep:webpki-roots"]
+# Exposes `getrandom02_fill` — the getrandom 0.2 backend routed to
+# astrid:sys/host.random-bytes. Register it in your capsule root (see rng.rs).
+getrandom02-shim = ["dep:astrid-sdk"]
+
+# `rustls-pki-types` compiles `UnixTime::now()` (SystemTime), which does not exist
+# on wasm32-unknown-unknown. Vendored one-line patch (a panicking stub; clients use
+# a custom TimeProvider — AstridTimeProvider — and never call it). This
+# `[patch.crates-io]` only applies when building astrid-tls as the workspace ROOT;
+# a crate depending on astrid-tls must add the same patch in its own root.
+[patch.crates-io]
+rustls-pki-types = { path = "vendor/rustls-pki-types" }
