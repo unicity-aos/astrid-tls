@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 description = "User-space TLS for Astrid capsules (wasm32): rustls with the pure-Rust RustCrypto provider and the astrid host clock, over the net host function"
-repository = "https://github.com/unicitynetwork/astrid-tls"
+repository = "https://github.com/unicity-aos/astrid-tls"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 astrid-sdk = { version = "0.7", optional = true }

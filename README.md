@@ -15,7 +15,7 @@ usual TLS stacks: `ring`/`aws-lc-rs` don't build for it, and `rustls` reaches fo
 - **`getrandom02_fill`** — a getrandom-0.2 custom backend routed to the astrid
   host CSPRNG (register it in your capsule root; see below).
 
-Extracted from [`astrid-ws`](https://github.com/unicitynetwork/astrid-ws) so
+Extracted from [`astrid-ws`](https://github.com/unicity-aos/astrid-ws) so
 capsules that need raw TLS (not just WebSocket) can reuse it. `astrid-ws`
 re-exports everything here.
 
@@ -23,14 +23,14 @@ re-exports everything here.
 
 ```toml
 [dependencies]
-astrid-tls = { git = "https://github.com/unicitynetwork/astrid-tls", features = ["astrid", "getrandom02-shim"] }
+astrid-tls = { git = "https://github.com/unicity-aos/astrid-tls", features = ["astrid", "getrandom02-shim"] }
 getrandom02 = { package = "getrandom", version = "0.2", features = ["custom"] }
 
 # REQUIRED in the consuming crate's workspace ROOT: rustls-pki-types compiles
 # UnixTime::now() (SystemTime), which wasm32-unknown-unknown lacks. `[patch.crates-io]`
 # is workspace-root only, so it cannot be centralized here.
 [patch.crates-io]
-rustls-pki-types = { git = "https://github.com/unicitynetwork/astrid-tls" }  # or vendor a copy
+rustls-pki-types = { git = "https://github.com/unicity-aos/astrid-tls" }  # or vendor a copy
 ```
 
 Register the getrandom backend in your capsule (the wasm **root** crate — a
